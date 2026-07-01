@@ -469,11 +469,11 @@
   </div>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script src="/gun.js"></script>
 <script>
 (function(){
   function pad(n){ return String(n).padStart(2,'0'); }
-  var gun = window.Gun ? window.Gun(['http://localhost:8765/gun']) : null;
+  var gun = window.Gun ? window.Gun([location.origin + '/gun']) : null;
   var appStore = gun && gun.get('ZuluTimeTrial');
   var manifestStore = appStore && appStore.get('Manifests');
   var voteStore = appStore && appStore.get('Votes');
