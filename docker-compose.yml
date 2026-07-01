@@ -1,6 +1,8 @@
 services:
   zulu:
     build: .
+    container_name: zulu
+    # image: ghcr.io/skorotkiewicz/zulu
     ports:
       - "8765:8765"
     environment:
