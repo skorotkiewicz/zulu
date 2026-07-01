@@ -298,6 +298,8 @@
   /* ---------- footer ---------- */
   .footer{padding:3rem 0 4.5rem;border-top:1px solid var(--border);text-align:center;}
   .footer p{color:var(--muted);font-size:0.85rem;max-width:55ch;margin:0 auto 0.75rem;}
+  .footer a{color:var(--cyan);text-decoration:none;}
+  .footer a:hover{text-decoration:underline;}
   .footer-stamp{font-family:var(--mono);color:var(--muted);font-size:0.72rem;letter-spacing:0.08em;margin-top:1.5rem !important;}
 
   a:focus-visible, button:focus-visible, input:focus-visible{
@@ -409,7 +411,7 @@
 <section class="section">
   <div class="wrap">
     <h2 class="section-label">// The Vote</h2>
-    <p class="prose">If the trial city would do it again, Phase 02 happens. If not, everything reverts and we never speak of it again. Cast a straw-poll vote below to see the bar move — Gun saves the rows when a peer is reachable.</p>
+    <p class="prose">If the trial city would do it again, Phase 02 happens. If not, everything reverts and we never speak of it again. Cast a straw-poll vote below to see the bar move.</p>
     <div class="vote-panel">
       <div class="vote-buttons">
         <button type="button" class="vote-btn keep" id="voteKeepBtn">Keep Zulu Time</button>
@@ -450,7 +452,7 @@
 <section class="section">
   <div class="wrap">
     <h2 class="section-label">// Sign The Manifest</h2>
-    <p class="section-intro">Tell us which city should run Phase 01. This list saves through Gun when a peer is reachable — a demo, not a real registration desk.</p>
+    <p class="section-intro">Tell us which city should run Phase 01. This is a public demo, not a real registration desk.</p>
     <form class="manifest-form" id="manifestForm">
       <label for="cityInput" class="sr-only">Your city</label>
       <input type="text" id="cityInput" placeholder="Your city" autocomplete="off" maxlength="80" required>
@@ -464,8 +466,8 @@
 
 <footer class="footer">
   <div class="wrap">
-    <p>Filed in Zulu time, because obviously. This is a thought experiment from a conversation, not an actual submission to the ICAO, the UN, or your local transit authority — though we'd read the confirmation email.</p>
-    <p>Drafted collaboratively: one human's childhood dream, typed up by Claude.</p>
+    <p>Filed in Zulu time, because obviously. This is a thought experiment, not an actual submission to the ICAO, the UN, or any local transit authority.</p>
+    <p><a href="https://github.com/skorotkiewicz/zulu" rel="noreferrer">Source on GitHub</a></p>
     <p class="footer-stamp" id="footerStamp">— rendering —</p>
   </div>
 </footer>
