@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0A0D12">
+<title>The Zulu Time Trial — A Proposal</title>
+<style>
+  :root{
+    --bg:#0A0D12;
+    --panel:#12161F;
+    --panel-2:#171D28;
+    --border:#232B3A;
+    --amber:#FFB020;
+    --amber-dim:#8A6420;
+    --cyan:#5EEAD4;
+    --cyan-dim:#2F6E64;
+    --text:#E8EAED;
+    --muted:#8791A6;
+    --mono:'SF Mono','JetBrains Mono',ui-monospace,'Cascadia Code',Consolas,'Roboto Mono',monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --radius:3px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    margin:0;
+    background-color:var(--bg);
+    background-image:
+      radial-gradient(ellipse 1200px 600px at 50% -10%, rgba(94,234,212,0.06), transparent),
+      repeating-linear-gradient(0deg, rgba(94,234,212,0.025) 0, rgba(94,234,212,0.025) 1px, transparent 1px, transparent 40px),
+      repeating-linear-gradient(90deg, rgba(94,234,212,0.025) 0, rgba(94,234,212,0.025) 1px, transparent 1px, transparent 40px);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .wrap{max-width:960px;margin:0 auto;padding:0 1.5rem;}
+
+  /* ---------- hero ---------- */
+  .hero{padding:5rem 0 4rem;}
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:0.75rem;
+    letter-spacing:0.08em;
+    color:var(--amber);
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    margin-bottom:1.5rem;
+  }
+  .dot{
+    display:inline-block;
+    width:8px;height:8px;border-radius:50%;
+    background:var(--cyan);
+    box-shadow:0 0 8px var(--cyan);
+    margin-right:0.6em;
+    animation:pulse 2s ease-in-out infinite;
+    flex-shrink:0;
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+
+  .title{
+    font-family:var(--mono);
+    font-weight:700;
+    text-transform:uppercase;
+    font-size:clamp(2.1rem,6vw,4rem);
+    letter-spacing:-0.02em;
+    line-height:1.05;
+    margin:0 0 1.5rem;
+    color:var(--text);
+  }
+  .title-rule{width:64px;height:3px;background:var(--amber);margin-bottom:1.5rem;}
+
+  .subtitle{
+    font-size:1.1rem;
+    color:var(--muted);
+    max-width:52ch;
+    margin:0 0 2.75rem;
+  }
+
+  .clock-panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:2rem;
+    text-align:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.03), 0 30px 50px -30px rgba(0,0,0,0.6);
+  }
+  .clock-panel-label{
+    font-family:var(--mono);
+    font-size:0.7rem;
+    letter-spacing:0.18em;
+    color:var(--muted);
+    margin-bottom:0.9rem;
+  }
+  .clock-display{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:clamp(2.4rem,9vw,4.5rem);
+    color:var(--amber);
+    text-shadow:0 0 30px rgba(255,176,32,0.35);
+    letter-spacing:0.02em;
+    font-variant-numeric:tabular-nums;
+  }
+  .clock-date{
+    font-family:var(--mono);
+    color:var(--cyan);
+    font-size:0.85rem;
+    letter-spacing:0.12em;
+    margin-top:0.6rem;
+  }
+  .z{color:var(--cyan);font-size:0.55em;font-weight:700;margin-left:0.15em;}
+
+  /* ---------- sections ---------- */
+  .section{padding:4rem 0;border-top:1px solid var(--border);}
+  .section-label{
+    font-family:var(--mono);
+    color:var(--amber);
+    font-size:0.85rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    margin:0 0 0.85rem;
+    font-weight:700;
+  }
+  .section-intro{color:var(--muted);max-width:62ch;margin:0;font-size:1rem;}
+  .prose{max-width:66ch;color:var(--text);font-size:1.05rem;margin:0 0 1.25rem;}
+  .prose:last-child{margin-bottom:0;}
+
+  /* ---------- sky check ---------- */
+  .sky-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    margin-top:2.25rem;
+  }
+  .sky-tile{background:var(--panel);padding:1.4rem 1rem;text-align:center;}
+  .sky-city{
+    font-family:var(--mono);
+    font-size:0.7rem;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:0.7rem;
+  }
+  .sky-time{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:1.4rem;
+    color:var(--cyan);
+    font-variant-numeric:tabular-nums;
+  }
+  .sky-state{margin-top:0.6rem;font-size:0.85rem;color:var(--text);}
+  .sky-offset{margin-top:0.4rem;font-family:var(--mono);font-size:0.65rem;color:var(--muted);}
+
+  /* ---------- phase plan ---------- */
+  .phase-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2.25rem;}
+  .phase-card{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:2rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .phase-num{
+    font-family:var(--mono);
+    font-size:3.2rem;
+    font-weight:700;
+    color:var(--border);
+    position:absolute;
+    top:0.75rem;
+    right:1.25rem;
+    line-height:1;
+  }
+  .phase-title{
+    font-family:var(--mono);
+    text-transform:uppercase;
+    font-size:1.15rem;
+    margin:0 0 0.9rem;
+    letter-spacing:0.01em;
+    position:relative;
+    max-width:80%;
+  }
+  .phase-meta{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:0.7rem;
+    letter-spacing:0.1em;
+    color:var(--cyan);
+    border:1px solid var(--cyan-dim);
+    padding:0.3rem 0.65rem;
+    border-radius:2px;
+    margin-bottom:1.4rem;
+  }
+  .phase-list{margin:0;padding-left:1.15rem;color:var(--muted);font-size:0.92rem;line-height:1.7;}
+  .phase-list li{margin-bottom:0.65rem;}
+  .phase-list li::marker{color:var(--amber);}
+  .phase-list li:last-child{margin-bottom:0;}
+
+  /* ---------- metrics ---------- */
+  .metric-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:1px;
+    background:var(--border);
+    border:1px solid var(--border);
+    margin-top:2.25rem;
+  }
+  .metric-tile{background:var(--panel);padding:1.6rem;}
+  .metric-label{
+    font-family:var(--mono);
+    color:var(--amber);
+    font-size:0.8rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    margin-bottom:0.65rem;
+    font-weight:700;
+  }
+  .metric-desc{color:var(--muted);font-size:0.9rem;line-height:1.6;}
+
+  /* ---------- vote ---------- */
+  .vote-panel{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:2rem;
+    margin-top:1rem;
+  }
+  .vote-buttons{display:flex;gap:1rem;margin-bottom:1.6rem;flex-wrap:wrap;}
+  button{
+    font-family:var(--mono);
+    font-size:0.78rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:0.85rem 1.25rem;
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:var(--radius);
+    cursor:pointer;
+    transition:border-color .2s, background .2s, color .2s;
+  }
+  .vote-btn{flex:1;min-width:180px;}
+  .vote-btn.keep{border-color:var(--cyan-dim);color:var(--cyan);}
+  .vote-btn.keep:hover{background:rgba(94,234,212,0.08);border-color:var(--cyan);}
+  .vote-btn.revert{border-color:var(--amber-dim);color:var(--amber);}
+  .vote-btn.revert:hover{background:rgba(255,176,32,0.08);border-color:var(--amber);}
+  .vote-bar{display:flex;height:10px;border-radius:2px;overflow:hidden;background:var(--panel-2);}
+  .vote-fill-keep{background:var(--cyan);width:50%;transition:width .35s ease;}
+  .vote-fill-revert{background:var(--amber);width:50%;transition:width .35s ease;}
+  .vote-count{margin-top:1rem;font-family:var(--mono);font-size:0.85rem;color:var(--muted);}
+
+  /* ---------- signal lists (risks / precedent) ---------- */
+  .signal-list{list-style:none;margin:2.25rem 0 0;padding:0;display:flex;flex-direction:column;gap:1.1rem;}
+  .signal-list li{position:relative;padding-left:1.85rem;color:var(--muted);font-size:0.96rem;line-height:1.65;}
+  .signal-list li strong{color:var(--text);font-weight:600;}
+  .signal-list.caution li::before{content:"▲";position:absolute;left:0;top:0.15rem;color:var(--amber);font-size:0.7rem;}
+  .signal-list.precedent li::before{content:"—";position:absolute;left:0;top:0;color:var(--cyan);}
+
+  /* ---------- manifest ---------- */
+  .manifest-form{display:flex;gap:0.75rem;margin-top:2.25rem;flex-wrap:wrap;}
+  .manifest-form input{
+    flex:1;
+    min-width:200px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:0.85rem 1rem;
+    font-family:var(--sans);
+    font-size:0.95rem;
+    border-radius:var(--radius);
+  }
+  .manifest-form input::placeholder{color:var(--muted);}
+  .manifest-list{list-style:none;margin:1.5rem 0 0;padding:0;display:flex;flex-wrap:wrap;gap:0.6rem;}
+  .manifest-list li{
+    background:var(--panel);
+    border:1px solid var(--border);
+    padding:0.55rem 0.9rem;
+    border-radius:2px;
+    font-size:0.85rem;
+    color:var(--text);
+  }
+  .manifest-seq{font-family:var(--mono);color:var(--amber);margin-right:0.6em;font-size:0.8em;}
+  .manifest-stamp{font-family:var(--mono);color:var(--muted);font-size:0.75em;margin-left:0.6em;}
+  .manifest-empty{color:var(--muted);font-style:italic;background:none !important;border:none !important;padding:0 !important;}
+
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+
+  /* ---------- footer ---------- */
+  .footer{padding:3rem 0 4.5rem;border-top:1px solid var(--border);text-align:center;}
+  .footer p{color:var(--muted);font-size:0.85rem;max-width:55ch;margin:0 auto 0.75rem;}
+  .footer-stamp{font-family:var(--mono);color:var(--muted);font-size:0.72rem;letter-spacing:0.08em;margin-top:1.5rem !important;}
+
+  a:focus-visible, button:focus-visible, input:focus-visible{
+    outline:2px solid var(--cyan);
+    outline-offset:2px;
+  }
+
+  @media (max-width:720px){
+    .phase-grid{grid-template-columns:1fr;}
+    .metric-grid{grid-template-columns:1fr;}
+    .hero{padding-top:3.5rem;}
+    .vote-buttons{flex-direction:column;}
+    .section{padding:3rem 0;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span>Proposal · Filed 01 Jul 2026 · Status: Seeking Volunteers</div>
+    <h1 class="title">The Zulu Time Trial</h1>
+    <div class="title-rule"></div>
+    <p class="subtitle">A two-phase experiment to find out if the planet can actually run on one clock — starting with a single city, staying voluntary, and settling everything with a vote.</p>
+
+    <div class="clock-panel">
+      <div class="clock-panel-label">Current Zulu Time</div>
+      <div class="clock-display" id="zuluClock">00:00:00<span class="z">Z</span></div>
+      <div class="clock-date" id="zuluDate">—</div>
+    </div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="wrap">
+    <h2 class="section-label">// Global Sky Check</h2>
+    <p class="section-intro">Six cities. One clock. Proof that the number was always the easy part.</p>
+    <div class="sky-grid" id="skyGrid"></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2 class="section-label">// The Premise</h2>
+    <p class="prose">Every clock on Earth is already secretly agreeing on Coordinated Universal Time — we just hide it behind local offsets so "8&nbsp;AM" keeps meaning "coffee," not "stars." Pilots, sailors, the military, and the crew of the ISS have already skipped the offset entirely and run their whole day on Zulu.</p>
+    <p class="prose">Nobody has tried it on an ordinary city's school bells and dinner reservations. That's the actual experiment: not whether Zulu time works, but whether it survives rush hour.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2 class="section-label">// The Plan</h2>
+    <div class="phase-grid">
+      <article class="phase-card">
+        <div class="phase-num">01</div>
+        <h3 class="phase-title">One City, Two Weeks</h3>
+        <div class="phase-meta">14 Days · Opt-in City</div>
+        <ul class="phase-list">
+          <li>One volunteer city — ideally one already used to juggling time zones for work or trade</li>
+          <li>Transit boards, shop hours, school bells, and TV listings all switch to Zulu overnight</li>
+          <li>A small "sun clock" stays posted alongside it for the first three days, then comes down</li>
+          <li>Anyone can opt out and keep local time — no one gets left stranded at a bus stop</li>
+        </ul>
+      </article>
+      <article class="phase-card">
+        <div class="phase-num">02</div>
+        <h3 class="phase-title">The Global Window</h3>
+        <div class="phase-meta">30 Days · Opt-in Worldwide</div>
+        <ul class="phase-list">
+          <li>Unlocks only if Phase 01's city would vote to do it again</li>
+          <li>Open registration — any person, team, or school anywhere can run their calendar in Zulu for a month</li>
+          <li>Everyone else keeps their normal clock; the experiment lives inside participants' own calendars</li>
+          <li>Cross-continent meetings stop needing a time zone converter — for participants, at least</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2 class="section-label">// What We Measure</h2>
+    <p class="section-intro">No fake results here — just the four questions the trial is actually built to answer.</p>
+    <div class="metric-grid">
+      <div class="metric-tile">
+        <div class="metric-label">Scheduling Friction</div>
+        <div class="metric-desc">Time to lock in a cross-timezone meeting, before the trial versus during it.</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-label">Sleep &amp; Rhythm</div>
+        <div class="metric-desc">Daily self-reported sleep quality and energy, tracked against the pre-trial baseline.</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-label">Drop-off Rate</div>
+        <div class="metric-desc">How many participants quietly revert early, and on which day they give up.</div>
+      </div>
+      <div class="metric-tile">
+        <div class="metric-label">Would You Keep It</div>
+        <div class="metric-desc">The one question that actually decides Phase 02 — asked plainly, at the end.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2 class="section-label">// The Vote</h2>
+    <p class="prose">If the trial city would do it again, Phase 02 happens. If not, everything reverts and we never speak of it again. Cast a straw-poll vote below to see the bar move — it's running live in your browser, not wired to anything global. Yet.</p>
+    <div class="vote-panel">
+      <div class="vote-buttons">
+        <button type="button" class="vote-btn keep" id="voteKeepBtn">Keep Zulu Time</button>
+        <button type="button" class="vote-btn revert" id="voteRevertBtn">Revert To Local</button>
+      </div>
+      <div class="vote-bar">
+        <div class="vote-fill-keep" id="voteFillKeep"></div>
+        <div class="vote-fill-revert" id="voteFillRevert"></div>
+      </div>
+      <div class="vote-count" id="voteCount">No votes yet — be the first.</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2 class="section-label">// Known Turbulence</h2>
+    <ul class="signal-list caution">
+      <li><strong>Prayer times and holidays are anchored to the sun and the calendar</strong>, not a clock number — those don't move just because the clock does.</li>
+      <li><strong>Labor law is written in clock hours.</strong> "9-to-5" needs a rewrite when 9 could be pitch dark for someone three time zones over.</li>
+      <li><strong>The date itself gets strange.</strong> Since the international date line doesn't move, "today" can flip to "tomorrow" in the middle of your afternoon.</li>
+      <li><strong>Kids run on daylight and routine</strong>, not a display. Phase 01 watches school-age participants especially closely.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2 class="section-label">// Flight Log (Prior Art)</h2>
+    <ul class="signal-list precedent">
+      <li>Aviation, shipping, the military, and the ISS already run entirely on Zulu — this proposal just asks whether an ordinary city could too.</li>
+      <li>In 2012, two Johns Hopkins professors — economist Steve Hanke and astrophysicist Richard Conn Henry — proposed exactly this for the whole world, confident people would simply learn to attach a new number to breakfast.</li>
+      <li>China already runs one time zone across a landmass wide enough for five — living proof that the clock number and the sun's position can drift apart without anything falling apart.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <h2 class="section-label">// Sign The Manifest</h2>
+    <p class="section-intro">Tell us which city should run Phase 01. This list lives only in your browser for this session — a demo, not a real registration desk.</p>
+    <form class="manifest-form" id="manifestForm">
+      <label for="cityInput" class="sr-only">Your city</label>
+      <input type="text" id="cityInput" placeholder="Your city" autocomplete="off" required>
+      <button type="submit">Add To Manifest</button>
+    </form>
+    <ul class="manifest-list" id="manifestList">
+      <li class="manifest-empty">No cities checked in yet. Yours could be first.</li>
+    </ul>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>Filed in Zulu time, because obviously. This is a thought experiment from a conversation, not an actual submission to the ICAO, the UN, or your local transit authority — though we'd read the confirmation email.</p>
+    <p>Drafted collaboratively: one human's childhood dream, typed up by Claude.</p>
+    <p class="footer-stamp" id="footerStamp">— rendering —</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  var lastMinute = -1;
+  var cities = [
+    {name:'Los Angeles', offset:-8},
+    {name:'New York', offset:-5},
+    {name:'London', offset:0},
+    {name:'Dubai', offset:4},
+    {name:'Tokyo', offset:9},
+    {name:'Auckland', offset:13}
+  ];
+
+  function skyState(localHour){
+    if (localHour >= 5 && localHour < 8) return {icon:'🌅', label:'Dawn'};
+    if (localHour >= 8 && localHour < 17) return {icon:'☀️', label:'Day'};
+    if (localHour >= 17 && localHour < 20) return {icon:'🌆', label:'Dusk'};
+    return {icon:'🌙', label:'Night'};
+  }
+
+  function offsetLabel(o){
+    if (o === 0) return 'UTC+0';
+    return o > 0 ? ('UTC+' + o) : ('UTC' + o);
+  }
+
+  function updateSkyGrid(h, m){
+    var grid = document.getElementById('skyGrid');
+    if (!grid) return;
+    grid.innerHTML = cities.map(function(c){
+      var localHour = ((h + c.offset) % 24 + 24) % 24;
+      var sky = skyState(localHour);
+      return '<div class="sky-tile">' +
+        '<div class="sky-city">' + c.name + '</div>' +
+        '<div class="sky-time">' + pad(h) + ':' + m + '<span class="z">Z</span></div>' +
+        '<div class="sky-state"><span class="sky-icon">' + sky.icon + '</span> ' + sky.label + '</div>' +
+        '<div class="sky-offset">' + offsetLabel(c.offset) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  var days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+  function updateClock(){
+    var now = new Date();
+    var h = now.getUTCHours();
+    var m = pad(now.getUTCMinutes());
+    var s = pad(now.getUTCSeconds());
+
+    var clockEl = document.getElementById('zuluClock');
+    if (clockEl) clockEl.innerHTML = pad(h) + ':' + m + ':' + s + '<span class="z">Z</span>';
+
+    var dateEl = document.getElementById('zuluDate');
+    if (dateEl) dateEl.textContent = days[now.getUTCDay()] + ' ' + pad(now.getUTCDate()) + ' ' + months[now.getUTCMonth()] + ' ' + now.getUTCFullYear();
+
+    var stampEl = document.getElementById('footerStamp');
+    if (stampEl) stampEl.textContent = 'rendered ' + pad(h) + ':' + m + ':' + s + 'Z on ' + pad(now.getUTCDate()) + ' ' + months[now.getUTCMonth()] + ' ' + now.getUTCFullYear();
+
+    if (now.getUTCMinutes() !== lastMinute){
+      lastMinute = now.getUTCMinutes();
+      updateSkyGrid(h, m);
+    }
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // Vote widget
+  var voteCounts = { keep: 0, revert: 0 };
+  function renderVote(){
+    var total = voteCounts.keep + voteCounts.revert;
+    var keepPct = total === 0 ? 50 : Math.round((voteCounts.keep/total)*100);
+    var fillKeep = document.getElementById('voteFillKeep');
+    var fillRevert = document.getElementById('voteFillRevert');
+    if (fillKeep) fillKeep.style.width = keepPct + '%';
+    if (fillRevert) fillRevert.style.width = (100-keepPct) + '%';
+    var countEl = document.getElementById('voteCount');
+    if (countEl){
+      countEl.textContent = total === 0
+        ? 'No votes yet — be the first.'
+        : total + ' vote' + (total===1?'':'s') + ' cast · ' + keepPct + '% keep / ' + (100-keepPct) + '% revert';
+    }
+  }
+  var keepBtn = document.getElementById('voteKeepBtn');
+  var revertBtn = document.getElementById('voteRevertBtn');
+  if (keepBtn) keepBtn.addEventListener('click', function(){ voteCounts.keep++; renderVote(); });
+  if (revertBtn) revertBtn.addEventListener('click', function(){ voteCounts.revert++; renderVote(); });
+  renderVote();
+
+  // Manifest sign-up
+  var manifestEntries = [];
+  function escapeHtml(str){
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+  function renderManifest(){
+    var list = document.getElementById('manifestList');
+    if (!list) return;
+    if (manifestEntries.length === 0){
+      list.innerHTML = '<li class="manifest-empty">No cities checked in yet. Yours could be first.</li>';
+      return;
+    }
+    list.innerHTML = manifestEntries.map(function(e, i){
+      return '<li><span class="manifest-seq">' + String(i+1).padStart(3,'0') + '</span>' + escapeHtml(e.city) + '<span class="manifest-stamp">checked in ' + e.stamp + '</span></li>';
+    }).join('');
+  }
+  var form = document.getElementById('manifestForm');
+  if (form){
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var input = document.getElementById('cityInput');
+      var val = input.value.trim();
+      if (!val) return;
+      var now = new Date();
+      var stamp = pad(now.getUTCHours()) + ':' + pad(now.getUTCMinutes()) + 'Z';
+      manifestEntries.push({city: val, stamp: stamp});
+      input.value = '';
+      renderManifest();
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
