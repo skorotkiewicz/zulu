@@ -545,16 +545,16 @@
 
   // Vote widget
   var votesById = {};
-  function voterId(){
+  function localId(key, prefix){
     try {
-      var id = localStorage.getItem('zuluVoterId');
+      var id = localStorage.getItem(key);
       if (!id){
-        id = 'voter-' + Date.now() + '-' + Math.random().toString(36).slice(2);
-        localStorage.setItem('zuluVoterId', id);
+        id = prefix + '-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+        localStorage.setItem(key, id);
       }
       return id;
     } catch (e) {
-      return 'session';
+      return prefix + '-session';
     }
   }
   function voteCounts(){
@@ -581,7 +581,7 @@
   }
   function saveVote(choice){
     var vote = {choice: choice, t: Date.now()};
-    var id = voterId();
+    var id = localId('zuluVoterId', 'voter');
     if (voteStore){
       voteStore.get(id).put(vote);
     } else {
@@ -654,10 +654,11 @@
       var now = new Date();
       var stamp = pad(now.getUTCHours()) + ':' + pad(now.getUTCMinutes()) + 'Z';
       var entry = {city: val.slice(0, 80), stamp: stamp, t: now.getTime()};
+      var id = localId('zuluManifestId', 'manifest');
       if (manifestStore){
-        manifestStore.set(entry);
+        manifestStore.get(id).put(entry);
       } else {
-        manifestEntriesById['local-' + entry.t + '-' + Math.random()] = entry;
+        manifestEntriesById[id] = entry;
         renderManifest();
       }
       input.value = '';
