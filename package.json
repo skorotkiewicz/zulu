@@ -1,5 +1,6 @@
 {
   "name": "zulu",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "start": "bun index.js"

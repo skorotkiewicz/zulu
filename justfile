@@ -7,7 +7,7 @@ default:
 add-tag:
     #!/usr/bin/env bash
     set -euo pipefail
-    VERSION=$(grep '^version' Cargo.toml | head -1 | cut -d'"' -f2)
+    VERSION=$(bun -e 'console.log(require("./package.json").version)')
     git push origin main
     git tag -a "v${VERSION}" -m "Release v${VERSION}"
     git push origin "v${VERSION}"
