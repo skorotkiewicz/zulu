@@ -2,6 +2,19 @@
 
 A tiny Bun + Gun page for the Zulu Time Trial.
 
+## Quick Start
+
+```sh
+docker pull ghcr.io/skorotkiewicz/zulu
+```
+
+```sh
+docker run --rm --name zulu \
+  -p 8765:8765 \
+  -v zulu-data:/app/data \
+  ghcr.io/skorotkiewicz/zulu
+```
+
 ## Run
 
 ```sh
