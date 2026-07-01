@@ -4,7 +4,7 @@ const Gun = require("gun");
 
 const port = Number(process.env.PORT || 8765);
 const indexPath = path.join(__dirname, "index.html");
-const gunPath = path.join(__dirname, "node_modules/gun/gun.js");
+const gunPath = require.resolve("gun/gun.js");
 
 const server = createServer();
 
