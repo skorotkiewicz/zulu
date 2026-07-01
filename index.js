@@ -4,6 +4,7 @@ const Gun = require("gun");
 
 const port = Number(process.env.PORT || 8765);
 const indexPath = path.join(__dirname, "index.html");
+const faviconPath = path.join(__dirname, "favicon.svg");
 const gunPath = require.resolve("gun/gun.js");
 
 const server = createServer();
@@ -28,6 +29,13 @@ server.on("request", async (req, res) => {
   if (url.pathname === "/gun.js") {
     const file = Bun.file(gunPath);
     res.writeHead(200, { "content-type": "application/javascript; charset=utf-8" });
+    res.end(await file.text());
+    return;
+  }
+
+  if (url.pathname === "/favicon.svg") {
+    const file = Bun.file(faviconPath);
+    res.writeHead(200, { "content-type": "image/svg+xml; charset=utf-8" });
     res.end(await file.text());
     return;
   }

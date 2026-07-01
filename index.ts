@@ -8,6 +8,7 @@ type Peer = {
 
 const port = Number(Bun.env.PORT || 8765);
 const indexFile = Bun.file(new URL("./index.html", import.meta.url));
+const faviconFile = Bun.file(new URL("./favicon.svg", import.meta.url));
 const gunFile = Bun.file(new URL(import.meta.resolve("gun/gun.js")));
 const gun = Gun({ file: "data" });
 const mesh = (gun as any)._.root.opt.mesh;
@@ -25,6 +26,12 @@ Bun.serve<{ peer?: Peer }>({
     if (url.pathname === "/gun.js") {
       return new Response(gunFile, {
         headers: { "content-type": "application/javascript; charset=utf-8" },
+      });
+    }
+
+    if (url.pathname === "/favicon.svg") {
+      return new Response(faviconFile, {
+        headers: { "content-type": "image/svg+xml; charset=utf-8" },
       });
     }
 
