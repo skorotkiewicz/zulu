@@ -545,6 +545,18 @@
 
   // Vote widget
   var votesById = {};
+  function voterId(){
+    try {
+      var id = localStorage.getItem('zuluVoterId');
+      if (!id){
+        id = 'voter-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+        localStorage.setItem('zuluVoterId', id);
+      }
+      return id;
+    } catch (e) {
+      return 'session';
+    }
+  }
   function voteCounts(){
     return Object.keys(votesById).reduce(function(counts, id){
       var choice = votesById[id].choice;
@@ -569,10 +581,11 @@
   }
   function saveVote(choice){
     var vote = {choice: choice, t: Date.now()};
+    var id = voterId();
     if (voteStore){
-      voteStore.set(vote);
+      voteStore.get(id).put(vote);
     } else {
-      votesById['local-' + vote.t + '-' + Math.random()] = vote;
+      votesById[id] = vote;
       renderVote();
     }
   }
