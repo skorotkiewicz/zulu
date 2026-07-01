@@ -408,7 +408,7 @@
 <section class="section">
   <div class="wrap">
     <h2 class="section-label">// The Vote</h2>
-    <p class="prose">If the trial city would do it again, Phase 02 happens. If not, everything reverts and we never speak of it again. Cast a straw-poll vote below to see the bar move — it's running live in your browser, not wired to anything global. Yet.</p>
+    <p class="prose">If the trial city would do it again, Phase 02 happens. If not, everything reverts and we never speak of it again. Cast a straw-poll vote below to see the bar move — Gun saves the rows when a peer is reachable.</p>
     <div class="vote-panel">
       <div class="vote-buttons">
         <button type="button" class="vote-btn keep" id="voteKeepBtn">Keep Zulu Time</button>
@@ -449,10 +449,10 @@
 <section class="section">
   <div class="wrap">
     <h2 class="section-label">// Sign The Manifest</h2>
-    <p class="section-intro">Tell us which city should run Phase 01. This list lives only in your browser for this session — a demo, not a real registration desk.</p>
+    <p class="section-intro">Tell us which city should run Phase 01. This list saves through Gun when a peer is reachable — a demo, not a real registration desk.</p>
     <form class="manifest-form" id="manifestForm">
       <label for="cityInput" class="sr-only">Your city</label>
-      <input type="text" id="cityInput" placeholder="Your city" autocomplete="off" required>
+      <input type="text" id="cityInput" placeholder="Your city" autocomplete="off" maxlength="80" required>
       <button type="submit">Add To Manifest</button>
     </form>
     <ul class="manifest-list" id="manifestList">
@@ -469,9 +469,14 @@
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
 <script>
 (function(){
   function pad(n){ return String(n).padStart(2,'0'); }
+  var gun = window.Gun ? window.Gun(['http://localhost:8765/gun']) : null;
+  var appStore = gun && gun.get('ZuluTimeTrial');
+  var manifestStore = appStore && appStore.get('Manifests');
+  var voteStore = appStore && appStore.get('Votes');
 
   var lastMinute = -1;
   var cities = [
@@ -538,10 +543,18 @@
   setInterval(updateClock, 1000);
 
   // Vote widget
-  var voteCounts = { keep: 0, revert: 0 };
+  var votesById = {};
+  function voteCounts(){
+    return Object.keys(votesById).reduce(function(counts, id){
+      var choice = votesById[id].choice;
+      if (choice === 'keep' || choice === 'revert') counts[choice]++;
+      return counts;
+    }, {keep: 0, revert: 0});
+  }
   function renderVote(){
-    var total = voteCounts.keep + voteCounts.revert;
-    var keepPct = total === 0 ? 50 : Math.round((voteCounts.keep/total)*100);
+    var counts = voteCounts();
+    var total = counts.keep + counts.revert;
+    var keepPct = total === 0 ? 50 : Math.round((counts.keep/total)*100);
     var fillKeep = document.getElementById('voteFillKeep');
     var fillRevert = document.getElementById('voteFillRevert');
     if (fillKeep) fillKeep.style.width = keepPct + '%';
@@ -553,29 +566,69 @@
         : total + ' vote' + (total===1?'':'s') + ' cast · ' + keepPct + '% keep / ' + (100-keepPct) + '% revert';
     }
   }
+  function saveVote(choice){
+    var vote = {choice: choice, t: Date.now()};
+    if (voteStore){
+      voteStore.set(vote);
+    } else {
+      votesById['local-' + vote.t + '-' + Math.random()] = vote;
+      renderVote();
+    }
+  }
+  if (voteStore){
+    voteStore.map().on(function(vote, id){
+      if (!vote || (vote.choice !== 'keep' && vote.choice !== 'revert')){
+        delete votesById[id];
+      } else {
+        votesById[id] = {choice: vote.choice, t: Number(vote.t) || 0};
+      }
+      renderVote();
+    });
+  }
   var keepBtn = document.getElementById('voteKeepBtn');
   var revertBtn = document.getElementById('voteRevertBtn');
-  if (keepBtn) keepBtn.addEventListener('click', function(){ voteCounts.keep++; renderVote(); });
-  if (revertBtn) revertBtn.addEventListener('click', function(){ voteCounts.revert++; renderVote(); });
+  if (keepBtn) keepBtn.addEventListener('click', function(){ saveVote('keep'); });
+  if (revertBtn) revertBtn.addEventListener('click', function(){ saveVote('revert'); });
   renderVote();
 
   // Manifest sign-up
-  var manifestEntries = [];
+  var manifestEntriesById = {};
   function escapeHtml(str){
     var div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
   }
+  function manifestEntries(){
+    return Object.keys(manifestEntriesById).map(function(id){
+      return manifestEntriesById[id];
+    }).sort(function(a, b){ return a.t - b.t; });
+  }
   function renderManifest(){
     var list = document.getElementById('manifestList');
     if (!list) return;
-    if (manifestEntries.length === 0){
+    var entries = manifestEntries();
+    if (entries.length === 0){
       list.innerHTML = '<li class="manifest-empty">No cities checked in yet. Yours could be first.</li>';
       return;
     }
-    list.innerHTML = manifestEntries.map(function(e, i){
-      return '<li><span class="manifest-seq">' + String(i+1).padStart(3,'0') + '</span>' + escapeHtml(e.city) + '<span class="manifest-stamp">checked in ' + e.stamp + '</span></li>';
+    list.innerHTML = entries.map(function(e, i){
+      return '<li><span class="manifest-seq">' + String(i+1).padStart(3,'0') + '</span>' + escapeHtml(e.city) + '<span class="manifest-stamp">checked in ' + escapeHtml(e.stamp) + '</span></li>';
     }).join('');
+  }
+  if (manifestStore){
+    manifestStore.map().on(function(entry, id){
+      var city = entry && String(entry.city || '').trim().slice(0, 80);
+      if (!city){
+        delete manifestEntriesById[id];
+      } else {
+        manifestEntriesById[id] = {
+          city: city,
+          stamp: String(entry.stamp || '').slice(0, 16),
+          t: Number(entry.t) || 0
+        };
+      }
+      renderManifest();
+    });
   }
   var form = document.getElementById('manifestForm');
   if (form){
@@ -586,9 +639,14 @@
       if (!val) return;
       var now = new Date();
       var stamp = pad(now.getUTCHours()) + ':' + pad(now.getUTCMinutes()) + 'Z';
-      manifestEntries.push({city: val, stamp: stamp});
+      var entry = {city: val.slice(0, 80), stamp: stamp, t: now.getTime()};
+      if (manifestStore){
+        manifestStore.set(entry);
+      } else {
+        manifestEntriesById['local-' + entry.t + '-' + Math.random()] = entry;
+        renderManifest();
+      }
       input.value = '';
-      renderManifest();
     });
   }
 })();
