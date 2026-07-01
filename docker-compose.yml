@@ -1,0 +1,13 @@
+services:
+  zulu:
+    build: .
+    ports:
+      - "8765:8765"
+    environment:
+      PORT: "8765"
+    volumes:
+      - zulu-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  zulu-data:
