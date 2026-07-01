@@ -1,0 +1,16 @@
+{
+  "name": "zulu",
+  "private": true,
+  "scripts": {
+    "start": "bun index.js"
+  },
+  "dependencies": {
+    "gun": "^0.2020.1240"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
